@@ -21,6 +21,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
+/**
+ * 스프링 시큐리티 설정입니다.
+ * @author Ru, Uju
+ */
 @RequiredArgsConstructor
 @EnableWebSecurity
 @Configuration
@@ -85,7 +89,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .oauth2Login()
-                .defaultSuccessUrl("https://www.awesomegreat.kro.kr/")
+                .defaultSuccessUrl("http://localhost:8080")
                 .userInfoEndpoint()
                 .userService(customOAuth2UserService);
 //        http
@@ -108,10 +112,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        //auth.userDetailsService(userService)
-                // 해당 서비스(userService)에서는 UserDetailsService를 implements해서
-                // loadUserByUsername() 구현해야함 (서비스 참고)
-                //.passwordEncoder(passwordEncoder());
         auth.authenticationProvider(authenticationProvider());
     }
 }

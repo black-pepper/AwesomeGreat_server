@@ -7,7 +7,10 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * 댓글 정보입니다.
+ * @Author: Uju
+ */
 @Data
 @Entity
 @Table(name="comments")

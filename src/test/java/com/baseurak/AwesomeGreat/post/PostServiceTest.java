@@ -49,7 +49,7 @@ class PostServiceTest {
 
     @Test
     void read() {
-        List<Post> findPosts = postService.read(999999L, 3);
+        List<Post> findPosts = postService.readPostList(999999L, 3);
         assertThat(findPosts).isEqualTo(posts);
 //        for (Post post : posts) {
 //            System.out.println("post " + post);
@@ -61,7 +61,7 @@ class PostServiceTest {
         Post post = posts.get(0);
         postService.modify(post.getId(), "MODIFY", user);
         //log.info("postId = {}", post.getId());
-        Post findPost = postService.read(post.getId());
+        Post findPost = postService.readPost(post.getId());
         //log.info("findPostId = {}", findPost.getId());
         assertThat(findPost.getContent()).isEqualTo("MODIFY");
     }
@@ -70,7 +70,7 @@ class PostServiceTest {
     void delete() {
         Post post = posts.get(0);
         postService.delete(post.getId(), user);
-        assertThatThrownBy(() -> postService.read(post.getId()))
+        assertThatThrownBy(() -> postService.readPost(post.getId()))
                 .isInstanceOf(NotFoundException.class);
     }
 }

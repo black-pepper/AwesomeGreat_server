@@ -7,7 +7,10 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-
+/**
+ * 게시글 정보입니다.
+ * @Author: Uju
+ */
 @Data
 @Entity
 @NoArgsConstructor

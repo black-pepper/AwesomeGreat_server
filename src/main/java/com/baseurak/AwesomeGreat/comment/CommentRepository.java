@@ -1,6 +1,7 @@
 package com.baseurak.AwesomeGreat.comment;
 
 import com.baseurak.AwesomeGreat.post.Post;
+import com.baseurak.AwesomeGreat.post.QPost;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -9,62 +10,109 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import static com.baseurak.AwesomeGreat.comment.QComment.comment;
+import static com.baseurak.AwesomeGreat.post.QPost.*;
 
+/**
+ * 댓글 관련 요청을 데이터베이스에서 처리합니다.
+ * @Author: Uju
+ */
 @Slf4j
 @Repository
 @Transactional
 public class CommentRepository {
 
     private final EntityManager em;
-    private final JPAQueryFactory query;
+    private final JPAQueryFactory queryFactory;
 
     public CommentRepository(EntityManager em) {
         this.em = em;
-        this.query = new JPAQueryFactory(em);
+        this.queryFactory = new JPAQueryFactory(em);
     }
 
-    public void create(Post post, Comment comment) {
+    /**
+     * comment를 저장하고 post의 댓글 개수를 추가합니다.
+     */
+    public void write(Post post, Comment comment) {
         post.setCommentCount(post.getCommentCount()+1);
         em.persist(comment);
     }
 
-    public List<Comment> read(Long postId) {
-//        String jpql = "SELECT c FROM Comment c WHERE c.postId = :postId";
-//        TypedQuery<Comment> query = em.createQuery(jpql, Comment.class);
-//        query.setParameter("postId", postId);
-//        //log.info("result = {}", query.getResultList());
-//        return query.getResultList();
-        return query
+    /**
+     * postid에 해당하는 게시글의 댓글을 모두 가져옵니다.
+     */
+    public List<Comment> readCommentList(Long postId) {
+        return queryFactory
                 .selectFrom(comment)
                 .where(comment.postId.eq(postId), comment.block.eq(false))
                 .fetch();
     }
 
-    public Comment readById(Long commentId) {
+    /**
+     * commentId에 해당하는 댓글을 가져옵니다.
+     */
+    public Comment readCommentById(Long commentId) {
         Comment findComment = em.find(Comment.class, commentId);
         return findComment;
     }
 
-    public void update(Long commentId, String contents) {
+    /**
+     * commentId에 해당하는 댓글의 글을 content로 수정합니다.
+     */
+    public void update(Long commentId, String content) {
         Comment findComment = em.find(Comment.class, commentId);
-        findComment.setContent(contents);
+        findComment.setContent(content);
     }
 
+    /**
+     * commentId에 해당하는 댓글의 글을 제거하고 post의 댓글 개수를 줄입니다.
+     */
     public void delete(Post post, Comment comment) {
         post.setCommentCount(post.getCommentCount()-1);
         em.remove(comment);
     }
 
+    /**
+     * userId와 commentId에 해당하는 댓글의 추천 상태를 recommend로 변경합니다.
+     */
+    public void setRecommend(Long commentId, Long userId, int recommend){
+        Comment findComment = em.find(Comment.class, commentId);
+        CommentState commentState = readCommentState(commentId, userId);
+        if (commentState == null) {
+            commentState = new CommentState(commentId, findComment.getUserId(), userId, 0, 0);
+            em.persist(commentState);
+        }
+        commentState.setRecommend(recommend);
+        findComment.setRecommend(findComment.getRecommend()+((recommend==1)?1:-1));
+    }
+
+    /**
+     * userId와 commentId에 해당하는 댓글의 신고 상태를 report로 변경합니다.
+     */
+    public void setReport(Long commentId, Long userId, int report){
+        Comment findComment = em.find(Comment.class, commentId);
+        CommentState commentState = readCommentState(commentId, userId);
+        if (commentState == null) {
+            commentState = new CommentState(commentId, findComment.getUserId(), userId, 0, 0);
+            em.persist(commentState);
+        }
+        commentState.setReport(report);
+        findComment.setReport(findComment.getReport()+((report==1)?1:-1));
+    }
+
+    /**
+     * userId와 commentId에 해당하는 댓글 상태를 추천으로 변경합니다.
+     * @deprecated 프론트엔드의 추천/신고를 PUT방식으로 변경후 제거 예정입니다.
+     */
+    @Deprecated
     public void addRecommend(Long commentId, Long userId) {
         Comment findComment = em.find(Comment.class, commentId);
-        CommentState commentState = findCommentState(commentId, userId);
+        CommentState commentState = readCommentState(commentId, userId);
 
         if (commentState == null) {
             commentState = new CommentState(commentId, findComment.getUserId(), userId, 1, 0);
@@ -77,10 +125,14 @@ public class CommentRepository {
             }
         }
     }
-
+    /**
+     * userId와 commentId에 해당하는 댓글 상태의 추천을 취소합니다.
+     * @deprecated 프론트엔드의 추천/신고를 PUT방식으로 변경후 제거 예정입니다.
+     */
+    @Deprecated
     public void deleteRecommend(Long commentId, Long userId){
         Comment findComment = em.find(Comment.class, commentId);
-        CommentState findCommentState = findCommentState(commentId, userId);
+        CommentState findCommentState = readCommentState(commentId, userId);
 
         if (findCommentState == null) return;
         if (findCommentState.getRecommend() == 1){
@@ -91,10 +143,14 @@ public class CommentRepository {
             em.remove(findCommentState);
         }
     }
-
+    /**
+     * userId와 commentId에 해당하는 댓글 상태를 신고로 변경합니다.
+     * @deprecated 프론트엔드의 추천/신고를 PUT방식으로 변경후 제거 예정입니다.
+     */
+    @Deprecated
     public void addReport(Long commentId, Long userId) {
         Comment findComment = em.find(Comment.class, commentId);
-        CommentState commentState = findCommentState(commentId, userId);
+        CommentState commentState = readCommentState(commentId, userId);
 
         if (commentState == null) {
             commentState = new CommentState(commentId, findComment.getUserId(), userId, 0, 1);
@@ -107,10 +163,14 @@ public class CommentRepository {
             }
         }
     }
-
+    /**
+     * userId와 commentId에 해당하는 댓글 상태의 신고를 취소합니다.
+     * @deprecated 프론트엔드의 추천/신고를 PUT방식으로 변경후 제거 예정입니다.
+     */
+    @Deprecated
     public void deleteReport(Long commentId, Long userId){
         Comment findComment = em.find(Comment.class, commentId);
-        CommentState findCommentState = findCommentState(commentId, userId);
+        CommentState findCommentState = readCommentState(commentId, userId);
 
         if (findCommentState == null) return;
         if (findCommentState.getReport()==1){
@@ -122,7 +182,10 @@ public class CommentRepository {
         }
     }
 
-    public CommentState findCommentState(Long commentId, Long userId){
+    /**
+     * commentId와 userId에 해당하는 추천/신고 정보를 가져옵니다.
+     */
+    public CommentState readCommentState(Long commentId, Long userId){
         String jpql = "SELECT c FROM CommentState AS c WHERE c.userId = :userId AND c.commentId = :commentId";
         TypedQuery<CommentState> query = em.createQuery(jpql, CommentState.class);
         query.setParameter("userId", userId);
@@ -132,6 +195,10 @@ public class CommentRepository {
         return resultList.get(0);
     }
 
+    /**
+     * 게시글(postId)에서 사용자(userId)가 이전에 사용한 닉네임을 찾습니다.
+     * @return 이전에 사용하던 닉네임이 존재하면 해당 닉네임을, 아니라면 null을 반환합니다.
+     */
     public String findNickname(Long postId, Long userId){
         String jpql = "SELECT c FROM Comment AS c WHERE c.postId = :postId AND c.userId = :userId";
         TypedQuery<Comment> query = em.createQuery(jpql, Comment.class);
@@ -143,6 +210,10 @@ public class CommentRepository {
         return resultList.get(0).getNickname();
     }
 
+    /**
+     * 게시글(postId)에서 같은 닉네임(nickname)을 사용하는 사람이 있는지 확인합니다.
+     * @return 같은 닉네임을 사용하는 인원 수를 리턴합니다.
+     */
     public int checkNickname(Long postId, String nickname){
         String jpql = "SELECT c FROM Comment AS c WHERE c.postId = :postId AND c.nickname LIKE CONCAT(:nickname, '%')";
         TypedQuery<Comment> query = em.createQuery(jpql, Comment.class);
@@ -151,23 +222,28 @@ public class CommentRepository {
 
         List<Comment> resultList = query.getResultList();
 
-        if (resultList.isEmpty()) return 0;
-
         List<Long> users = new ArrayList<>();
+
+        Post findPost = queryFactory
+                .selectFrom(post)
+                .where(post.id.eq(postId))
+                .fetch().get(0);
+        if (findPost.getNickname() == nickname){
+            users.add(findPost.getUserId());
+        }
         for (Comment comment : resultList) {
             if(!users.contains(comment.getUserId())) users.add(comment.getUserId());
         }
         return users.size();
     }
 
-    public List<Comment> findByUserId(Long userId, Long commentId, int cnt) {
-//        String jpql = "SELECT c FROM Comment AS c WHERE c.userId = :userId AND c.id <= :commentId ORDER BY c.id desc";
-//        TypedQuery<Comment> query = em.createQuery(jpql, Comment.class)
-//                .setParameter("userId", userId)
-//                .setParameter("commentId", commentId)
-//                .setMaxResults(cnt);
-//        return query.getResultList();
-        return query
+    /**
+     * userId가 작성한 댓글을 가져옵니다.
+     * @param commentId: commentId보다 작은 id를 가진 댓글을 가져옵니다.
+     * @param cnt: 가져오는 댓글의 최대 개수 입니다.
+     */
+    public List<Comment> readCommentListByUserId(Long userId, Long commentId, int cnt) {
+        return queryFactory
                 .selectFrom(comment)
                 .where(comment.userId.eq(userId), comment.id.loe(commentId), comment.block.eq(false))
                 .orderBy(comment.id.desc())
@@ -175,27 +251,36 @@ public class CommentRepository {
                 .fetch();
     }
 
+    /**
+     * 사용자가 당일 작성한 댓글의 수를 계산합니다.
+     */
     public Long countCommentToday(Long userId){
-        List<Long> result = query
+        List<Long> result = queryFactory
                 .select(comment.count())
                 .from(comment)
-                .where(comment.userId.eq(userId), comment.uploadDate.after(CalDate()))
+                .where(comment.userId.eq(userId), comment.uploadDate.after(getDate()))
                 .fetch();
         if (result == null) return 0L;
         else return result.get(0);
     }
 
-    private Timestamp CalDate() {
+    /**
+     * 쿼리문에 필요한 당일 날짜를 계산합니다.
+     * @return 서버가 표준시일 때를 기준으로 한국의 현재 날짜를 표준시로 변환하여 반환합니다.
+     */
+    private Timestamp getDate() {
         Calendar serverDate = Calendar.getInstance();
         serverDate.setTime(new Date());
-        serverDate.add(Calendar.HOUR, 9);
-        Date koreanDate = serverDate.getTime();
-        koreanDate.setHours(0);
-        koreanDate.setMinutes(0);
-        koreanDate.setSeconds(0);
-        Calendar result = Calendar.getInstance();
-        result.setTime(koreanDate);
-        result.add(Calendar.HOUR, -9);
-        return new Timestamp(result.getTimeInMillis());
+        if (serverDate.get(Calendar.HOUR_OF_DAY)<15){
+            serverDate.add(Calendar.DAY_OF_MONTH, -1);
+        }
+
+        Date queryDate = new Date(
+                serverDate.get(Calendar.YEAR),
+                serverDate.get(Calendar.MONTH),
+                serverDate.get(Calendar.DAY_OF_MONTH)
+        );
+        queryDate.setHours(15);
+        return new Timestamp(queryDate.getTime());
     }
 }

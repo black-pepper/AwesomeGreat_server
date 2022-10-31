@@ -5,7 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-
+/**
+ * 댓글의 좋아요,신고 상태 정보입니다.
+ * @Author: Uju
+ */
 @Data
 @Entity
 @NoArgsConstructor
