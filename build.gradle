@@ -1,0 +1,75 @@
+plugins {
+	id 'org.springframework.boot' version '2.6.4'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+group = 'com.baseurak'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+ext["hibernate.version"] = "5.6.5.Final"
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.projectlombok:lombok:1.18.24'
+
+	//lombok 라이브러리 추가
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	//jpa 추가
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	//implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+	//mysql 추가
+	implementation 'mysql:mysql-connector-java'
+	//runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+
+	// Spring Security + JWT
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	testImplementation 'org.springframework.security:spring-security-test'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.4.5'
+
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+
+	//ModelMapper 추가
+	implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.3.8'
+
+	//Querydsl 추가
+	implementation 'com.querydsl:querydsl-jpa'
+	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Spring Security + JWT
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	//lombok 테스트
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	//implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.8'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
