@@ -4,7 +4,7 @@
 * 칭찬 익명 커뮤니티 '굉장해! 엄청나!'의 백엔드 코드입니다. 실제 사용중인 저장소에서 민감 정보를 제외하였습니다.
 
 ## 클래스 다이어그램
-* 추가 예정
+![](https://github.com/black-pepper/AwesomeGreat_server/tree/master\assets\UML.jpg)
 
-## ERD 다이어그램
-* 추가 예정
+## ER 다이어그램
+![](https://github.com/black-pepper/AwesomeGreat_server/tree/master/assets/ERD.png)
