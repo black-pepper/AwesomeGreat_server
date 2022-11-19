@@ -19,6 +19,8 @@ public class QComment extends EntityPathBase<Comment> {
 
     public static final QComment comment = new QComment("comment");
 
+    public final BooleanPath block = createBoolean("block");
+
     public final StringPath content = createString("content");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
@@ -26,6 +28,8 @@ public class QComment extends EntityPathBase<Comment> {
     public final StringPath nickname = createString("nickname");
 
     public final NumberPath<Long> postId = createNumber("postId", Long.class);
+
+    public final NumberPath<Integer> recommend = createNumber("recommend", Integer.class);
 
     public final NumberPath<Integer> report = createNumber("report", Integer.class);
 

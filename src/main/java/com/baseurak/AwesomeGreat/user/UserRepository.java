@@ -5,15 +5,14 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
+/**
+ * @Author: Ru
+ */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>
 {
-    User findByPersonalId(String personalId);
-    User findByPersonalIdAndPassword(String personalId, String password);
-    void deleteByPersonalId(String personalId);
+    User findByEmail(String email);
+    User findByEmailAndPassword(String email, String password);
     List<User> findAll();
     //void save(User user);
-
-    //Optional<User> findByEmail(String email);
 }

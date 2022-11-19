@@ -7,7 +7,10 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-
+/**
+ * 오늘 작성한 글, 댓글 개수가 포함된 사용자 정보입니다.
+ * @Author: Uju
+ */
 @Data
 @Builder
 @NoArgsConstructor

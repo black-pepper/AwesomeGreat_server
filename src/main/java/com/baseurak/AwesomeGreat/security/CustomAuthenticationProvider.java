@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+/**
+ * @Author: Ru
+ */
 @Slf4j
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
@@ -36,8 +39,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         if(!passwordEncoder.matches(password, findUserDetails.getPassword())){
             throw new BadCredentialsException("BadCredentialsException");
         }
-
-        log.info("Success Login");
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(findUserDetails, null, findUserDetails.getAuthorities());
         return authenticationToken;

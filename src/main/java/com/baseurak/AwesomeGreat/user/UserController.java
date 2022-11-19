@@ -1,18 +1,15 @@
 package com.baseurak.AwesomeGreat.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-
+/**
+ * 일반 로그인 관련 요청을 HTTP 프로토콜로 받아 처리합니다.
+ * @Author: Uju, Ru
+ */
 @Slf4j
 @RestController
 public class UserController {
@@ -21,39 +18,28 @@ public class UserController {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    @GetMapping("/")
-    public HashMap<String, String> findUser() {
-        User user = userService.findUserBySessionId();
-        HashMap<String, String> userInfo = new HashMap<>();
-        userInfo.put("userId", String.valueOf(user.getId()));
-        userInfo.put("personalId", user.getPersonalId());
-        userInfo.put("role", String.valueOf(user.getRole()));
-        userInfo.put("demerit", String.valueOf(user.getDemerit()));
-        return userInfo;
+    @GetMapping("/user")
+    public UserInfo findUser() {
+        return userService.findUserInfo();
     }
 
     @PostMapping("/user")
-    public /*Message*/void createUser(UserDto userDto) { //
-
-//        ModelMapper modelMapper = new ModelMapper();
-//        User newUser = modelMapper.map(userDto, User.class);
+    public void create(UserDto userDto) { //
         User newUser = new User();
-        newUser.setPersonalId(userDto.getPersonalId());
+        newUser.setEmail(userDto.getEmail());
         newUser.setPassword(passwordEncoder.encode(userDto.getPassword())); //비밀번호 암호화
         newUser.setRole(Role.USER);
         newUser.setDemerit(0);
-        userService.createUser(newUser);
-
-//        return message;
+        userService.create(newUser);
     }
 
     //@GetMapping("/user")
-    public List<User> readUsers(){
-        return userService.readAllUsers();
+    public List<User> readUserList(){
+        return userService.readUserList();
     }
 
-    @GetMapping("/user")
-    public User readUser(){
-        return userService.findUserBySessionId();
+    @DeleteMapping("/user")
+    public void delete(){
+        userService.delete();
     }
 }
