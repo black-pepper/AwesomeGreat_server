@@ -19,11 +19,17 @@ public class QPost extends EntityPathBase<Post> {
 
     public static final QPost post = new QPost("post");
 
+    public final BooleanPath block = createBoolean("block");
+
+    public final NumberPath<Integer> commentCount = createNumber("commentCount", Integer.class);
+
     public final StringPath content = createString("content");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath nickname = createString("nickname");
+
+    public final NumberPath<Integer> recommend = createNumber("recommend", Integer.class);
 
     public final NumberPath<Integer> report = createNumber("report", Integer.class);
 

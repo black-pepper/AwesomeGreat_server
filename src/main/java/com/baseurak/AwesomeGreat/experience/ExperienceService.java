@@ -15,28 +15,28 @@ public class ExperienceService {
     /**
      * userId에 해당하는 게시글의 수를 가져옵니다.
      */
-    Long countPost(Long userId){
+    public Long countPost(Long userId){
         return experienceRepository.countPost(userId);
     }
 
     /**
      * userId에 해당하는 게시글에 받은 추천 수를 가져옵니다.
      */
-    Long sumPostRecommend(Long userId){
+    public Long sumPostRecommend(Long userId){
         return experienceRepository.sumPostRecommend(userId);
     }
 
     /**
      * userId에 해당하는 댓글의 수를 가져옵니다.
      */
-    Long countComment(Long userId) {
+    public Long countComment(Long userId) {
         return experienceRepository.countComment(userId);
     }
 
     /**
      * userId에 해당하는 댓글의 추천 수를 가져옵니다.
      */
-    Long sumCommentRecommend(Long userId) {
+    public Long sumCommentRecommend(Long userId) {
         return experienceRepository.sumCommentRecommend(userId);
     }
 }

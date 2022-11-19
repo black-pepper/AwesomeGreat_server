@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Experience {
-    Long postCount;
-    Long postRecommendSum;
-    Long commentCount;
-    Long commentRecommendSum;
+    private Long postCount;
+    private Long postRecommendSum;
+    private Long commentCount;
+    private Long commentRecommendSum;
 }

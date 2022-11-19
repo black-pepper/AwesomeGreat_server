@@ -12,6 +12,6 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
-    private String personalId;
+    private String email;
     private String password;
 }
