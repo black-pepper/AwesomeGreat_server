@@ -26,15 +26,18 @@ class JavaTest {
     void ChangeDateTest(){
         Calendar serverDate = Calendar.getInstance();
         serverDate.setTime(new Date());
-        serverDate.add(Calendar.HOUR, 9);
-        Date koreanDate = serverDate.getTime();
-        koreanDate.setHours(0);
-        koreanDate.setMinutes(0);
-        koreanDate.setSeconds(0);
-        Calendar result = Calendar.getInstance();
-        result.setTime(koreanDate);
-        result.add(Calendar.HOUR, -9);
-        log.info("day = {}", result.getTime());
 
+        if (serverDate.get(Calendar.HOUR_OF_DAY)<15){
+            serverDate.add(Calendar.DAY_OF_MONTH, -1);
+        }
+
+        Date queryDate = new Date(
+                serverDate.get(Calendar.YEAR),
+                serverDate.get(Calendar.MONTH),
+                serverDate.get(Calendar.DAY_OF_MONTH)
+        );
+        queryDate.setHours(15);
+        log.info("day = {}", queryDate);
     }
+
 }

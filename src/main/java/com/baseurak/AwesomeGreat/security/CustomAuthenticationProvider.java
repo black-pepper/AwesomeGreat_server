@@ -37,6 +37,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException("BadCredentialsException");
         }
 
+        log.info("Success Login");
+
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(findUserDetails, null, findUserDetails.getAuthorities());
         return authenticationToken;
     }

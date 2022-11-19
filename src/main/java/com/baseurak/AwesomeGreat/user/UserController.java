@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,19 +21,30 @@ public class UserController {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    @GetMapping("/user")
-    public UserInfo findUser() {
-        return userService.findUserInfo();
+    @GetMapping("/")
+    public HashMap<String, String> findUser() {
+        User user = userService.findUserBySessionId();
+        HashMap<String, String> userInfo = new HashMap<>();
+        userInfo.put("userId", String.valueOf(user.getId()));
+        userInfo.put("personalId", user.getPersonalId());
+        userInfo.put("role", String.valueOf(user.getRole()));
+        userInfo.put("demerit", String.valueOf(user.getDemerit()));
+        return userInfo;
     }
 
     @PostMapping("/user")
-    public void createUser(UserDto userDto) { //
+    public /*Message*/void createUser(UserDto userDto) { //
+
+//        ModelMapper modelMapper = new ModelMapper();
+//        User newUser = modelMapper.map(userDto, User.class);
         User newUser = new User();
-        newUser.setEmail(userDto.getEmail());
+        newUser.setPersonalId(userDto.getPersonalId());
         newUser.setPassword(passwordEncoder.encode(userDto.getPassword())); //비밀번호 암호화
         newUser.setRole(Role.USER);
         newUser.setDemerit(0);
         userService.createUser(newUser);
+
+//        return message;
     }
 
     //@GetMapping("/user")
@@ -39,8 +52,8 @@ public class UserController {
         return userService.readAllUsers();
     }
 
-    @DeleteMapping("/user")
-    public void deleteUser(){
-        userService.deleteUser();
+    @GetMapping("/user")
+    public User readUser(){
+        return userService.findUserBySessionId();
     }
 }

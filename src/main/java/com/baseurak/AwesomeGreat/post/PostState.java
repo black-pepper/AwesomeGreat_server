@@ -7,7 +7,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
+/**
+ * 게시글의 좋아요,신고 상태 정보입니다.
+ * @Author: Uju
+ */
 @Data
 @Entity
 @NoArgsConstructor

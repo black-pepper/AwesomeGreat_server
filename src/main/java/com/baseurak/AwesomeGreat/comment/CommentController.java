@@ -1,7 +1,5 @@
 package com.baseurak.AwesomeGreat.comment;
 
-import com.baseurak.AwesomeGreat.exception.BadRequestException;
-import com.baseurak.AwesomeGreat.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,54 +12,42 @@ public class CommentController {
     @Autowired
     CommentService commentService;
     @Autowired
-    UserService userService;
+    CommentRepository commentRepository;
+
+    public String redirect(Long postId){
+        return "<meta http-equiv=\"refresh\" content=\"0;url=/post/"+ postId.toString() +"\">";
+    }
 
     @GetMapping("/comment/{id}") //댓글 읽기
-    public List<CommentDto> readComments(@PathVariable("id") Long postId)
+    public List<Comment> readComments(@PathVariable("id") Long postId)
     {
-        return commentService.read(postId, userService.findUserBySessionId());
+        return commentService.read(postId);
     }
 
     @GetMapping("/user-comment")
-    public List<Comment> readUserComments(Long userId, Long commentId, Integer cnt)
+    public List<Comment> readUserComments(Long userId)
     {
-        if(commentId == null) commentId = 99999L;
-        if(cnt == null) cnt = 10;
-        if (userId==null) throw new BadRequestException();
-        return commentService.findByUserId(userId, commentId, cnt);
+        return commentService.read(userId);
     }
 
     @PostMapping("/comment") //새 댓글 작성
-    public void writeComment(String content, Long postId) {
-        if (content.isEmpty()) throw new BadRequestException();
-        commentService.write(postId, content, userService.findUserInfo());
+    public String writeComment(String content, Long postId) {
+        Comment comment = new Comment();
+        comment.setPostId(postId);
+        comment.setContent(content);
+        commentService.write(comment);
+        return redirect(comment.getPostId());
     }
 
     @DeleteMapping("/comment/{id}") //댓글 삭제
-    public void deleteComment(@PathVariable("id") Long id) {
-        commentService.delete(id, userService.findUserBySessionId());
+    public String deleteComment(@PathVariable("id") Long id) {
+        commentService.delete(id);
+        return "<meta http-equiv=\"refresh\" content=\"0;url=/\">";
     }
 
     @PutMapping("/comment") //댓글 수정
-    public void modifyComment(Long commentId, String content) {
-        if (content.isEmpty()) throw new BadRequestException();
-        commentService.modify(commentId, content, userService.findUserBySessionId());
-    }
-
-    @PostMapping("/comment/recommend/{id}")
-    void addRecommend(@PathVariable("id") Long commentId){
-        commentService.addRecommend(commentId, userService.findUserBySessionId());
-    }
-    @DeleteMapping("/comment/recommend/{id}")
-    void deleteRecommend(@PathVariable("id") Long commentId){
-        commentService.deleteRecommend(commentId, userService.findUserBySessionId());
-    }
-    @PostMapping("/comment/report/{id}")
-    void addReport(@PathVariable("id") Long commentId){
-        commentService.addReport(commentId, userService.findUserBySessionId());
-    }
-    @DeleteMapping("/comment/report/{id}")
-    void deleteReport(@PathVariable("id") Long commentId){
-        commentService.deleteReport(commentId, userService.findUserBySessionId());
+    public String modifyComment(Long commentId, String content) {
+        commentService.modify(commentId, content);
+        return redirect(commentRepository.readById(commentId).getPostId());
     }
 }

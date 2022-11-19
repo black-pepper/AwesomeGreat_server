@@ -1,6 +1,5 @@
 package com.baseurak.AwesomeGreat.comment;
 
-import com.baseurak.AwesomeGreat.exception.NotFoundException;
 import com.baseurak.AwesomeGreat.post.Post;
 import com.baseurak.AwesomeGreat.post.PostService;
 import com.baseurak.AwesomeGreat.user.Role;
@@ -63,7 +62,7 @@ public class commentTest {
 
     @Test
     void read() {
-        List<CommentDto> findComments = commentService.read(post.getId(), user);
+        List<CommentDto> findComments = commentService.readCommentDtoList(post.getId(), user);
         assertThat(findComments).isEqualTo(commentDtos);
     }
 
@@ -71,7 +70,7 @@ public class commentTest {
     void modify() {
         CommentDto commentDto = commentDtos.get(0);
         commentService.modify(commentDto.getId(), "MODIFY", user);
-        CommentDto findCommentDto = commentService.read(post.getId(), user).get(0);
+        CommentDto findCommentDto = commentService.readCommentDtoList(post.getId(), user).get(0);
         assertThat(findCommentDto.getContent()).isEqualTo("MODIFY");
     }
 
@@ -79,7 +78,7 @@ public class commentTest {
     void delete() {
         CommentDto commentDto = commentDtos.get(0);
         commentService.delete(commentDto.getId(), user);
-        CommentDto findCommentDto = commentService.read(post.getId(), user).get(0);
+        CommentDto findCommentDto = commentService.readCommentDtoList(post.getId(), user).get(0);
         assertThat(findCommentDto.getContent()).isEqualTo("TEST2");
     }
 }

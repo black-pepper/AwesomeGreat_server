@@ -11,6 +11,7 @@ public class AwesomeGreatApplication {
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(AwesomeGreatApplication.class, args);
 		UserRepository memberRepository = context.getBean(UserRepository.class);
+
 	}
 
 }

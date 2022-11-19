@@ -1,7 +1,6 @@
 package com.baseurak.AwesomeGreat.common;
 
 import com.baseurak.AwesomeGreat.security.CustomAuthenticationProvider;
-import com.baseurak.AwesomeGreat.user.CustomOAuth2UserService;
 import com.baseurak.AwesomeGreat.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,13 +12,22 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -27,7 +35,6 @@ import java.util.Arrays;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserService userService;
-    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -50,60 +57,53 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/").permitAll()
                 //회원
-                .antMatchers(HttpMethod.GET,"/user**").permitAll()
                 .antMatchers(HttpMethod.POST,"/user**").permitAll()
-                .antMatchers(HttpMethod.DELETE, "/user").hasAnyAuthority("USER", "ADMIN")
+                .antMatchers(HttpMethod.GET,"/user**").permitAll()
                 .antMatchers(HttpMethod.POST, "/login**").permitAll()
                 //게시글
                 .antMatchers(HttpMethod.GET, "/post**").permitAll()
                 .antMatchers(HttpMethod.GET, "/post/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/post**").hasAnyAuthority("USER", "ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/post/**").hasAnyAuthority("USER", "ADMIN")
-                .antMatchers(HttpMethod.PUT, "/post**").hasAnyAuthority("USER", "ADMIN")
-                .antMatchers(HttpMethod.GET, "/random").permitAll()
-                .antMatchers(HttpMethod.GET, "/search").permitAll()
+                .antMatchers(HttpMethod.POST, "/post**").hasRole("USER")
+                .antMatchers(HttpMethod.POST, "/post").hasRole("USER")
+                .antMatchers(HttpMethod.DELETE, "/post/**").hasRole("USER")
+                .antMatchers(HttpMethod.PUT, "/post**").hasRole("USER")
                 //댓글
                 .antMatchers(HttpMethod.GET, "/comment/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/comment**").hasAnyAuthority("USER", "ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/comment/**").hasAnyAuthority("USER", "ADMIN")
-                .antMatchers(HttpMethod.PUT, "/comment**").hasAnyAuthority("USER", "ADMIN")
-                //경험치
-                .antMatchers("/experience/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/comment").hasRole("USER")
+                .antMatchers(HttpMethod.DELETE, "/comment/**").hasRole("USER")
+                .antMatchers(HttpMethod.PUT, "/comment").hasRole("USER")
                 .anyRequest().authenticated()
         .and()
                 .csrf().disable();
         http
-                .cors().configurationSource(corsConfigurationSource());
-        http
                 .formLogin()
                 .loginPage("/login")
-                .permitAll();
-        http
-                .logout()
-                .deleteCookies("JSESSIONID")
-                .permitAll();
-
-        http
-                .oauth2Login()
-                .defaultSuccessUrl("https://www.awesomegreat.kro.kr/")
-                .userInfoEndpoint()
-                .userService(customOAuth2UserService);
-//        http
-//                .rememberMe()
-//                .tokenValiditySeconds(604800);
-        http
-                .sessionManagement().maximumSessions(10);
-
-    }
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://www.awesomegreat.kro.kr"));
-        configuration.addAllowedMethod("*");
-        configuration.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+                //.defaultSuccessUrl("http://localhost:3000/main")
+                .defaultSuccessUrl("/")
+                //.failureUrl("http://localhost:3000/login")
+                .failureUrl("/fail")
+                //.authenticationDetailsSource(formWebAuthenticationDetailsSource)
+                .permitAll()
+//                .successHandler((request, response, authentication) -> {
+//                    RequestCache requestCache = new HttpSessionRequestCache();
+//                    SavedRequest savedRequest = requestCache.getRequest(request, response);
+//                    String redirectUrl = savedRequest.getRedirectUrl();
+//                    response.sendRedirect(redirectUrl);
+//                })
+//                .authorizeRequests()
+//                .antMatchers("/login", "/signup", "/home").permitAll() // 누구나 접근 허용
+//                .antMatchers("/").hasRole("USER") // USER, ADMIN만 접근 가능
+//                .antMatchers("/admin").hasRole("ADMIN") // ADMIN만 접근 가능
+//                .anyRequest().authenticated() // 나머지 요청들은 권한의 종류에 상관 없이 권한이 있어야 접근 가능
+//                .and()
+//                .formLogin()
+//                .loginPage("/login") // 로그인 페이지 링크
+//                .defaultSuccessUrl("/") // 로그인 성공 후 리다이렉트 주소
+//                .and()
+//                .logout()
+//                .logoutSuccessUrl("/login") // 로그아웃 성공시 리다이렉트 주소
+//                .invalidateHttpSession(true) // 세션 날리기
+        ;
     }
 
     @Override
