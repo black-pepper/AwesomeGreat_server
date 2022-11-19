@@ -21,11 +21,11 @@ public class QUser extends EntityPathBase<User> {
 
     public final NumberPath<Integer> demerit = createNumber("demerit", Integer.class);
 
-    public final StringPath email = createString("email");
-
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath password = createString("password");
+
+    public final StringPath personalId = createString("personalId");
 
     public final EnumPath<Role> role = createEnum("role", Role.class);
 

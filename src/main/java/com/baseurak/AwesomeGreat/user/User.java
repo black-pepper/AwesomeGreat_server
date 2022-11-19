@@ -19,7 +19,7 @@ public class User  implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String email;
+    private String personalId;
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -28,8 +28,8 @@ public class User  implements UserDetails {
     public User(){}
 
     @Builder
-    public User(String email, String password){
-        this.email = email;
+    public User(String personalId, String password){
+        this.personalId = personalId;
         this.password = password;
     }
 
@@ -39,8 +39,7 @@ public class User  implements UserDetails {
         GrantedAuthority g = new GrantedAuthority() {
             @Override
             public String getAuthority() {
-                //return "ROLE_" + role.toString();
-                return role.toString();
+                return "ROLE_" + role.toString();
             }
         };
         gList.add(g);
@@ -48,10 +47,9 @@ public class User  implements UserDetails {
         return gList;
     }
 
-
     @Override
     public String getUsername() {
-        return email;
+        return personalId;
     }
 
     // 계정 만료 확인, true : 만료안됨
@@ -76,5 +74,4 @@ public class User  implements UserDetails {
         return false;
     }
 
-    //public Object update(String name) {}
 }
